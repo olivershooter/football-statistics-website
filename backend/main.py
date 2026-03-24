@@ -1,7 +1,10 @@
-from fastapi import FastAPI, HTTPException, Request, Query
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic_settings import BaseSettings
 import httpx
+import logging
+
+logger = logging.getLogger(__name__)
 
 class Settings(BaseSettings):
     api_key: str
@@ -38,14 +41,16 @@ async def make_api_request(params: dict):
             response.raise_for_status()
             return response.json()
         except httpx.HTTPStatusError as e:
+            logger.warning("Upstream API returned %s", e.response.status_code)
             raise HTTPException(
                 status_code=e.response.status_code,
-                detail=f"External API error: {str(e)}"
+                detail="Upstream API error."
             )
         except Exception as e:
+            logger.exception("Unexpected error calling upstream API")
             raise HTTPException(
                 status_code=500,
-                detail=f"Internal server error: {str(e)}"
+                detail="An unexpected error occurred."
             )
 
 @app.get("/")
@@ -54,10 +59,15 @@ async def root():
 
 @app.get("/api/football/fixtures")
 async def get_fixtures(
-    request: Request,
     id: int = Query(None),
     league: int = Query(None),
     season: int = Query(None)
 ):
-    params = dict(request.query_params)
+    params = {}
+    if id is not None:
+        params["id"] = id
+    if league is not None:
+        params["league"] = league
+    if season is not None:
+        params["season"] = season
     return await make_api_request(params)
