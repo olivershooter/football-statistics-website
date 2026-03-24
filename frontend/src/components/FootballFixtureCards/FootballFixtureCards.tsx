@@ -14,7 +14,7 @@ interface FootballFixtureCardProps {
 }
 
 export const FootballFixtureCards = ({
-	id,
+	id: _id,
 	homeTeamName,
 	homeTeamLogo,
 	homeTeamScore,
