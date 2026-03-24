@@ -1,41 +1,32 @@
-import {
-	NavigationMenu,
-	NavigationMenuItem,
-	NavigationMenuList,
-} from "@/components/ui/navigation-menu";
 import { Link, Outlet, createRootRoute } from "@tanstack/react-router";
 
 export const Route = createRootRoute({
 	component: () => (
 		<>
-			<NavigationMenu className="h-fit p-4">
-				<NavigationMenuList className="flex items-center gap-4">
-					<NavigationMenuItem>
-						<h1 className="text-md font-bold">Football Stats</h1>
-					</NavigationMenuItem>
-					<NavigationMenuItem>
+			<nav className="sticky top-0 z-50 border-b border-white/[0.06] bg-background/95 backdrop-blur-md">
+				<div className="container flex h-16 items-center justify-between">
+					<Link to="/" className="font-bebas text-2xl tracking-widest text-pitch">
+						KICKOFF
+					</Link>
+					<div className="flex items-center gap-8">
 						<Link
 							to="/"
-							className="border-red-500 pb-1 [&.active]:border-b-2 [&.active]:text-red-500"
+							className="text-sm font-medium tracking-wide text-muted-foreground transition-colors hover:text-foreground [&.active]:text-pitch"
 						>
-							Home
+							HOME
 						</Link>
-					</NavigationMenuItem>
-					<NavigationMenuItem>
 						<Link
 							to="/football/fixtures"
-							className="border-red-500 pb-1 [&.active]:border-b-2 [&.active]:text-red-500"
+							className="text-sm font-medium tracking-wide text-muted-foreground transition-colors hover:text-foreground [&.active]:text-pitch"
 						>
-							Football
+							FIXTURES
 						</Link>
-					</NavigationMenuItem>
-				</NavigationMenuList>
-			</NavigationMenu>
-			<hr />
-			<div className="container pt-12">
+					</div>
+				</div>
+			</nav>
+			<div className="container pt-8 pb-16">
 				<Outlet />
 			</div>
-			{/* <TanStackRouterDevtools /> */}
 		</>
 	),
 });

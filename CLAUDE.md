@@ -1,0 +1,1 @@
+On further iterations of the application, make sure to properly version control. Update the package.json correctly, commit with good commit messages, and push to github.

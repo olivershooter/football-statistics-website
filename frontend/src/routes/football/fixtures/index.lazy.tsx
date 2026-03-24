@@ -24,7 +24,7 @@ import {
 import { useGetRequest } from "@/hooks/useGetRequest";
 import type { FootballFixtures } from "@/types/football/football";
 import { createLazyFileRoute } from "@tanstack/react-router";
-import { ChevronsUpDown, Check } from "lucide-react";
+import { ChevronsUpDown, Check, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -79,11 +79,24 @@ function FootballComponent() {
 	}, [selectedLeagueId, selectedSeason]);
 
 	if (error) {
-		return <div>Error loading fixtures: {error?.message}</div>;
+		return (
+			<div className="flex min-h-[40vh] items-center justify-center">
+				<div className="rounded-xl border border-loss/20 bg-loss/[0.06] px-8 py-6 text-center text-loss">
+					Error loading fixtures: {error?.message}
+				</div>
+			</div>
+		);
 	}
 
 	if (isPending) {
-		return <div>Loading...</div>;
+		return (
+			<div className="flex min-h-[40vh] items-center justify-center">
+				<div className="flex flex-col items-center gap-3">
+					<div className="h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-pitch" />
+					<span className="text-sm text-muted-foreground">Loading fixtures...</span>
+				</div>
+			</div>
+		);
 	}
 
 	const footballData = data?.response || [];
@@ -96,15 +109,37 @@ function FootballComponent() {
 		);
 	});
 
+	const selectedLeagueLabel = leagues.find(
+		(l) => l.value === selectedLeagueId,
+	)?.label;
+	const selectedSeasonLabel = seasons.find(
+		(s) => s.value === selectedSeason,
+	)?.label;
+
 	return (
-		<div className="space-y-4">
-			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-				<Input
-					placeholder="Search teams..."
-					value={searchQuery}
-					onChange={(e) => setSearchQuery(e.target.value)}
-					className="max-w-[300px]"
-				/>
+		<div className="space-y-6">
+			{/* Page header */}
+			<div className="mb-8">
+				<h1 className="font-bebas text-4xl tracking-widest text-foreground sm:text-5xl">
+					Fixtures
+				</h1>
+				<p className="mt-1 text-sm text-muted-foreground">
+					{selectedLeagueLabel} · {selectedSeasonLabel}
+				</p>
+			</div>
+
+			{/* Filters bar */}
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+				<div className="relative max-w-xs">
+					<Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+					<Input
+						placeholder="Search teams..."
+						value={searchQuery}
+						onChange={(e) => setSearchQuery(e.target.value)}
+						className="pl-9"
+					/>
+				</div>
+
 				<div className="flex gap-2">
 					<Popover open={leagueOpen} onOpenChange={setLeagueOpen}>
 						<PopoverTrigger asChild>
@@ -114,7 +149,7 @@ function FootballComponent() {
 								role="combobox"
 								aria-expanded={leagueOpen}
 								aria-controls="league-options"
-								className="w-[200px] justify-between"
+								className="w-[190px] justify-between"
 							>
 								{selectedLeagueId
 									? leagues.find((league) => league.value === selectedLeagueId)
@@ -123,7 +158,7 @@ function FootballComponent() {
 								<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 							</Button>
 						</PopoverTrigger>
-						<PopoverContent className="w-[200px] p-0">
+						<PopoverContent className="w-[190px] p-0">
 							<Command>
 								<CommandInput placeholder="Search league..." />
 								<CommandList>
@@ -167,7 +202,7 @@ function FootballComponent() {
 								role="combobox"
 								aria-expanded={seasonOpen}
 								aria-controls="season-options"
-								className="w-[200px] justify-between"
+								className="w-[145px] justify-between"
 							>
 								{selectedSeason
 									? seasons.find((season) => season.value === selectedSeason)
@@ -176,7 +211,7 @@ function FootballComponent() {
 								<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 							</Button>
 						</PopoverTrigger>
-						<PopoverContent className="w-[200px] p-0">
+						<PopoverContent className="w-[145px] p-0">
 							<Command>
 								<CommandInput placeholder="Search season..." />
 								<CommandList>
@@ -212,6 +247,14 @@ function FootballComponent() {
 				</div>
 			</div>
 
+			{/* Results count */}
+			{searchQuery && (
+				<p className="text-sm text-muted-foreground">
+					{filteredFixtures.length} result{filteredFixtures.length !== 1 ? "s" : ""} for "{searchQuery}"
+				</p>
+			)}
+
+			{/* Grid */}
 			<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 				{filteredFixtures
 					.slice(startIndex, endIndex)
@@ -237,7 +280,7 @@ function FootballComponent() {
 						<PaginationPrevious
 							className={
 								startIndex === 0
-									? "pointer-events-none opacity-50"
+									? "pointer-events-none opacity-30"
 									: "cursor-pointer"
 							}
 							onClick={() => {
@@ -251,7 +294,7 @@ function FootballComponent() {
 						<PaginationNext
 							className={
 								endIndex >= filteredFixtures.length
-									? "pointer-events-none opacity-50"
+									? "pointer-events-none opacity-30"
 									: "cursor-pointer"
 							}
 							onClick={() => {

@@ -1,9 +1,3 @@
-import {
-	Card,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
 import { Link } from "@tanstack/react-router";
 import { getScoreColor } from "../Common/GetScoreColor";
 
@@ -33,53 +27,70 @@ export const FootballFixtureCards = ({
 	const isTie = homeTeamScore === awayTeamScore;
 	const isHomeWinner = homeTeamScore > awayTeamScore;
 
+	const formattedDate = new Date(date).toLocaleDateString("en-GB", {
+		weekday: "short",
+		month: "short",
+		day: "numeric",
+		hour: "2-digit",
+		minute: "2-digit",
+	});
+
 	return (
 		<Link to="/football/fixtures/$id" params={{ id: params.toString() }}>
-			<Card key={id}>
-				<CardHeader>
-					<CardTitle className="flex items-center justify-between">
-						<div className="flex w-full flex-col items-center text-center">
-							<img
-								src={homeTeamLogo}
-								alt={`${homeTeamName} logo`}
-								className="mx-auto mb-2 h-10 w-10 object-contain"
-							/>
-							<span className="mt-2 text-sm font-bold">{homeTeamName}</span>
-							<span
-								className={`${getScoreColor(true, isHomeWinner, isTie)} mt-2 text-base font-bold`}
-							>
-								{homeTeamScore}
+			<div
+				key={id}
+				className="group relative overflow-hidden rounded-xl border border-white/[0.07] bg-card transition-all duration-200 hover:border-pitch/40 hover:shadow-[0_0_24px_rgba(0,232,122,0.08)]"
+			>
+				{/* Date bar */}
+				<div className="border-b border-white/[0.06] px-4 py-2.5 text-center text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+					{formattedDate}
+				</div>
+
+				{/* Teams + Score */}
+				<div className="flex items-center justify-between gap-2 px-4 py-5">
+					{/* Home team */}
+					<div className="flex flex-1 flex-col items-center gap-2">
+						<img
+							src={homeTeamLogo}
+							alt={`${homeTeamName} logo`}
+							className="h-12 w-12 object-contain drop-shadow-sm"
+						/>
+						<span className="text-center text-xs font-medium leading-tight text-foreground/90">
+							{homeTeamName}
+						</span>
+					</div>
+
+					{/* Score */}
+					<div className="flex flex-col items-center gap-0.5">
+						<div className="flex items-center gap-1.5 font-bebas text-4xl leading-none">
+							<span className={getScoreColor(true, isHomeWinner, isTie)}>
+								{homeTeamScore ?? "-"}
+							</span>
+							<span className="text-muted-foreground/40 text-2xl">:</span>
+							<span className={getScoreColor(false, isHomeWinner, isTie)}>
+								{awayTeamScore ?? "-"}
 							</span>
 						</div>
+					</div>
 
-						<span className="mx-4 text-lg font-bold">vs</span>
+					{/* Away team */}
+					<div className="flex flex-1 flex-col items-center gap-2">
+						<img
+							src={awayTeamLogo}
+							alt={`${awayTeamName} logo`}
+							className="h-12 w-12 object-contain drop-shadow-sm"
+						/>
+						<span className="text-center text-xs font-medium leading-tight text-foreground/90">
+							{awayTeamName}
+						</span>
+					</div>
+				</div>
 
-						<div className="flex w-full flex-col items-center text-center">
-							<img
-								src={awayTeamLogo}
-								alt={`${awayTeamName} logo`}
-								className="mx-auto mb-2 h-10 w-10 object-contain"
-							/>
-							<span className="mt-2 text-sm font-bold">{awayTeamName}</span>
-							<span
-								className={`${getScoreColor(false, isHomeWinner, isTie)} mt-2 text-base font-bold`}
-							>
-								{awayTeamScore}
-							</span>
-						</div>
-					</CardTitle>
-					<CardDescription className="mt-2 text-center text-xs">
-						{new Date(date).toLocaleDateString("en-GB", {
-							weekday: "short",
-							year: "numeric",
-							month: "short",
-							day: "numeric",
-							hour: "2-digit",
-							minute: "2-digit",
-						})}
-					</CardDescription>
-				</CardHeader>
-			</Card>
+				{/* View match footer */}
+				<div className="border-t border-white/[0.05] px-4 py-2.5 text-center text-[11px] font-medium uppercase tracking-wider text-muted-foreground/60 transition-colors group-hover:text-pitch">
+					View Match →
+				</div>
+			</div>
 		</Link>
 	);
 };

@@ -18,7 +18,16 @@ module.exports = {
 			},
 		},
 		extend: {
+			fontFamily: {
+				bebas: ["Bebas Neue", "cursive"],
+				inter: ["Inter", "sans-serif"],
+			},
 			colors: {
+				pitch: "#00E87A",
+				"pitch-dark": "#00B860",
+				loss: "#FF4455",
+				draw: "#6B7280",
+				gold: "#FFD700",
 				border: "hsl(var(--border))",
 				input: "hsl(var(--input))",
 				ring: "hsl(var(--ring))",
