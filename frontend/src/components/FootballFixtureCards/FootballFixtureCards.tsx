@@ -37,10 +37,7 @@ export const FootballFixtureCards = ({
 
 	return (
 		<Link to="/football/fixtures/$id" params={{ id: params.toString() }}>
-			<div
-				key={id}
-				className="group relative overflow-hidden rounded-xl border border-white/[0.07] bg-card transition-all duration-200 hover:border-pitch/40 hover:shadow-[0_0_24px_rgba(0,232,122,0.08)]"
-			>
+			<div className="group relative overflow-hidden rounded-xl border border-white/[0.07] bg-card transition-all duration-200 hover:border-pitch/40 hover:shadow-[0_0_24px_rgba(0,232,122,0.08)]">
 				{/* Date bar */}
 				<div className="border-b border-white/[0.06] px-4 py-2.5 text-center text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
 					{formattedDate}

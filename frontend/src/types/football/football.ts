@@ -29,22 +29,29 @@ export interface Player {
 	pos: string;
 }
 
-export interface StartXI extends Player {
-	grid: string;
-}
-
-export interface Substitute extends Player {
-	grid?: string;
+// The API wraps each player in a { player: Player } envelope inside startXI/substitutes
+export interface LineupPlayer {
+	player: Player;
 }
 
 export interface Lineup {
-	startXI: StartXI[];
-	substitutes: Substitute[];
+	team: {
+		id: number;
+		name: string;
+		logo: string;
+		colors: {
+			player: { primary: string; number: string; border: string };
+			goalkeeper: { primary: string; number: string; border: string };
+		};
+	};
+	formation: string;
+	startXI: LineupPlayer[];
+	substitutes: LineupPlayer[];
 }
 
 export interface StatisticsItem {
 	type: string;
-	value: string | number;
+	value: string | number | null;
 }
 
 export interface Statistics {
@@ -55,26 +62,7 @@ export interface Team {
 	id: number;
 	name: string;
 	logo: string;
-	colors: {
-		player: {
-			primary: string;
-			number: string;
-			border: string;
-		};
-		goalkeeper: {
-			primary: string;
-			number: string;
-			border: string;
-		};
-	};
 	winner: boolean;
-	coach: {
-		id: number;
-		name: string;
-		photo: string;
-	};
-	formation: string;
-	update?: string;
 }
 
 export interface Event {
@@ -87,7 +75,7 @@ export interface Event {
 		name: string;
 		logo: string;
 	};
-	player?: {
+	player: {
 		id: number;
 		name: string;
 		photo?: string;
@@ -104,30 +92,21 @@ export interface Event {
 		| "Penalty Scored"
 		| "Red Card"
 		| "VAR Review"
-		| "Free Kick Won"
-		| "Free Kick Lost"
-		| "Tackles"
-		| "Fouls"
-		| "Standoffs"
-		| "Duels"
-		| "yclic Attack"
-		| "D offsides"
-		| "GAwaiting"
 		| string;
 	detail: string;
 	comments?: string;
 }
 
-type MatchStatus = {
+export type MatchStatus = {
 	long: string;
 	short: string;
 	elapsed: number;
 	extra: number | null;
 };
 
-type Fixture = {
+export type Fixture = {
 	id: number;
-	referee: string;
+	referee: string | null;
 	timezone: string;
 	date: string;
 	timestamp: number;
@@ -155,22 +134,10 @@ export interface League {
 }
 
 export interface Score {
-	halftime: {
-		home: number;
-		away: number;
-	};
-	fulltime: {
-		home: number;
-		away: number;
-	};
-	extratime: {
-		home: number | null;
-		away: number | null;
-	};
-	penalty: {
-		home: number | null;
-		away: number | null;
-	};
+	halftime: { home: number; away: number };
+	fulltime: { home: number; away: number };
+	extratime: { home: number | null; away: number | null };
+	penalty: { home: number | null; away: number | null };
 }
 
 export interface Teams {
@@ -182,10 +149,7 @@ export interface FootballFixture {
 	fixture: Fixture;
 	league: League;
 	teams: Teams;
-	goals: {
-		home: number;
-		away: number;
-	};
+	goals: { home: number; away: number };
 	score: Score;
 	events: Event[];
 	lineups: Lineup[];
@@ -198,15 +162,10 @@ export interface FootballFixtureResponse {
 
 export interface FootballFixtureQuery {
 	get: string;
-	parameters: {
-		id: string;
-	};
-	errors: any[];
+	parameters: { id: string };
+	errors: unknown[];
 	results: number;
-	paging: {
-		current: number;
-		total: number;
-	};
+	paging: { current: number; total: number };
 	response: FootballFixture[];
 }
 

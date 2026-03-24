@@ -49,7 +49,7 @@ export const EventTimeline = ({ events }: EventTimelineProps) => {
 					{events.map((event: any) => (
 						<CarouselItem
 							className="flex h-36 items-center justify-center p-4"
-							key={event.time.elapsed + event.player.id}
+							key={`${event.time.elapsed}-${event.player.id}`}
 						>
 							<div className="flex h-36 w-52 flex-col items-center gap-1.5 rounded-xl border border-white/[0.07] bg-card px-4 py-3 transition-colors hover:border-white/[0.12]">
 								<span className="w-full text-left text-xs font-semibold text-pitch">

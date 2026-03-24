@@ -63,12 +63,8 @@ function FootballComponent() {
 	const [startIndex, setStartIndex] = useState(0);
 	const [endIndex, setEndIndex] = useState(itemsPerPage);
 
-	const API_OPTIONS = {
-		url: "/api/football/fixtures",
-	};
-
 	const { data, error, isPending } = useGetRequest({
-		url: `${API_OPTIONS.url}?league=${selectedLeagueId}&season=${selectedSeason}`,
+		url: `/api/football/fixtures?league=${selectedLeagueId}&season=${selectedSeason}`,
 		queryKey: ["footballFixtures", selectedLeagueId, selectedSeason],
 		gcTime: 1000 * 60 * 24,
 	});

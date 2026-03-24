@@ -17,7 +17,7 @@ export const useGetRequest = ({
 	gcTime,
 }: UseGetRequestOptions) => {
 	const getData = async () => {
-		const response = await axios.get(url, header && { headers: header });
+		const response = await axios.get(url, header ? { headers: header } : undefined);
 		return response.data;
 	};
 

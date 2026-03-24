@@ -3,11 +3,24 @@ import { SectionHeader } from "@/components/Common/SectionHeader";
 import { EventTimeline } from "@/components/FootballFixture/EventTimeline";
 import { ShirtSVG } from "@/components/FootballFixture/ShirtSVG";
 import { useGetRequest } from "@/hooks/useGetRequest";
+import type { Lineup, StatisticsItem } from "@/types/football/football";
 import { createFileRoute } from "@tanstack/react-router";
 
-const API_OPTIONS = {
-	url: "/api/football/fixtures",
+const FIXTURES_URL = "/api/football/fixtures";
+
+const POSITION_MAP: Record<string, string> = {
+	D: "DEF",
+	G: "GK",
+	M: "MID",
+	F: "FWD",
 };
+
+const STAT_TYPES = [
+	"Ball Possession",
+	"Shots on Goal",
+	"Corner Kicks",
+	"Yellow Cards",
+];
 
 export const Route = createFileRoute("/football/fixtures/$id")({
 	component: FootballFixture,
@@ -17,7 +30,7 @@ function FootballFixture() {
 	const { id } = Route.useParams();
 
 	const { data, error, isPending } = useGetRequest({
-		url: `${API_OPTIONS.url}?id=${id}`,
+		url: `${FIXTURES_URL}?id=${id}`,
 		queryKey: `${id}`,
 		gcTime: 1000 * 60 * 60 * 24 * 7,
 	});
@@ -56,22 +69,13 @@ function FootballFixture() {
 		minute: "2-digit",
 	});
 
-	const positionMap: Record<string, string> = {
-		D: "DEF",
-		G: "GK",
-		M: "MID",
-		F: "FWD",
-	};
-
 	const isTie = score.fulltime.home === score.fulltime.away;
 	const isHomeWinner = score.fulltime.home > score.fulltime.away;
 
 	const renderScoreHero = () => (
 		<div className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-card">
-			{/* Background glow */}
 			<div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-pitch/[0.03] to-transparent" />
 
-			{/* League badge */}
 			<div className="relative flex items-center justify-center gap-2 border-b border-white/[0.06] py-3">
 				<img
 					src={league.logo}
@@ -83,9 +87,7 @@ function FootballFixture() {
 				</span>
 			</div>
 
-			{/* Score row */}
 			<div className="relative flex items-center justify-between gap-4 px-6 py-8 sm:px-12">
-				{/* Home */}
 				<div className="flex flex-1 flex-col items-center gap-3">
 					<img
 						src={teams.home.logo}
@@ -97,7 +99,6 @@ function FootballFixture() {
 					</span>
 				</div>
 
-				{/* Score */}
 				<div className="flex flex-col items-center gap-1">
 					<div className="flex items-center gap-2">
 						<span
@@ -105,9 +106,7 @@ function FootballFixture() {
 						>
 							{score.fulltime.home}
 						</span>
-						<span className="font-bebas text-4xl text-muted-foreground/30">
-							:
-						</span>
+						<span className="font-bebas text-4xl text-muted-foreground/30">:</span>
 						<span
 							className={`font-bebas text-6xl leading-none sm:text-7xl ${getScoreColor(false, isHomeWinner, isTie)}`}
 						>
@@ -119,7 +118,6 @@ function FootballFixture() {
 					</span>
 				</div>
 
-				{/* Away */}
 				<div className="flex flex-1 flex-col items-center gap-3">
 					<img
 						src={teams.away.logo}
@@ -132,7 +130,6 @@ function FootballFixture() {
 				</div>
 			</div>
 
-			{/* Match meta */}
 			<div className="relative grid grid-cols-3 divide-x divide-white/[0.06] border-t border-white/[0.06]">
 				{[
 					{ label: "Status", value: fixture.status.short },
@@ -152,57 +149,53 @@ function FootballFixture() {
 		</div>
 	);
 
-	const renderLineup = (teamIndex: number) => {
-		const team = lineups[teamIndex];
-		return (
-			<div className="space-y-2">
-				<div className="mb-4 flex items-center justify-between">
-					<h3 className="font-bebas text-xl tracking-wide text-foreground">
-						{team.team.name}
-					</h3>
-					<span className="rounded-full border border-white/[0.08] bg-secondary px-3 py-1 text-xs text-muted-foreground">
-						{team.formation}
-					</span>
-				</div>
-				{team.startXI.map(({ player }: { player: any }) => (
-					<div
-						key={player.id}
-						className="flex items-center justify-between rounded-lg border border-white/[0.05] bg-secondary/60 px-3 py-2.5 transition-colors hover:border-white/10 hover:bg-secondary"
-					>
-						<div className="flex items-center gap-3">
-							<ShirtSVG
-								width={32}
-								height={32}
-								playersNumber={player.number ? player.number.toString() : "?"}
-								colour={
-									team.team.colors.player.primary
-										? `#${team.team.colors.player.primary}`
-										: "#333333"
-								}
-								alt={player.name}
-							/>
-							<span className="text-sm font-medium text-foreground/90">
-								{player.name}
-							</span>
-						</div>
-						<span className="rounded bg-secondary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-							{positionMap[player.pos] || player.pos}
+	const renderLineup = (lineup: Lineup) => (
+		<div className="space-y-2">
+			<div className="mb-4 flex items-center justify-between">
+				<h3 className="font-bebas text-xl tracking-wide text-foreground">
+					{lineup.team.name}
+				</h3>
+				<span className="rounded-full border border-white/[0.08] bg-secondary px-3 py-1 text-xs text-muted-foreground">
+					{lineup.formation}
+				</span>
+			</div>
+			{lineup.startXI.map(({ player }) => (
+				<div
+					key={player.id}
+					className="flex items-center justify-between rounded-lg border border-white/[0.05] bg-secondary/60 px-3 py-2.5 transition-colors hover:border-white/10 hover:bg-secondary"
+				>
+					<div className="flex items-center gap-3">
+						<ShirtSVG
+							width={32}
+							height={32}
+							playersNumber={player.number ? player.number.toString() : "?"}
+							colour={
+								lineup.team.colors.player.primary
+									? `#${lineup.team.colors.player.primary}`
+									: "#333333"
+							}
+							alt={player.name}
+						/>
+						<span className="text-sm font-medium text-foreground/90">
+							{player.name}
 						</span>
 					</div>
-				))}
-			</div>
-		);
-	};
+					<span className="rounded bg-secondary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+						{POSITION_MAP[player.pos] ?? player.pos}
+					</span>
+				</div>
+			))}
+		</div>
+	);
 
 	const renderStatBar = (
 		homeVal: string | number | null,
 		awayVal: string | number | null,
 		label: string,
 	) => {
-		const parseVal = (v: string | number | null) => {
+		const parseVal = (v: string | number | null): number => {
 			if (v === null || v === undefined) return 0;
-			if (typeof v === "string" && v.endsWith("%"))
-				return Number.parseInt(v, 10);
+			if (typeof v === "string" && v.endsWith("%")) return Number.parseInt(v, 10);
 			return Number(v) || 0;
 		};
 
@@ -210,8 +203,7 @@ function FootballFixture() {
 		const away = parseVal(awayVal);
 		const total = home + away;
 		const homePct = total > 0 ? (home / total) * 100 : 50;
-		const isPercentage =
-			typeof homeVal === "string" && homeVal?.endsWith("%");
+		const isPercentage = typeof homeVal === "string" && homeVal.endsWith("%");
 
 		return (
 			<div key={label} className="space-y-2">
@@ -228,13 +220,8 @@ function FootballFixture() {
 				</div>
 				{isPercentage && (
 					<div className="flex h-1.5 w-full overflow-hidden rounded-full bg-secondary">
-						<div
-							className="h-full bg-pitch transition-all"
-							style={{ width: `${homePct}%` }}
-						/>
-						<div
-							className="h-full flex-1 bg-muted-foreground/30"
-						/>
+						<div className="h-full bg-pitch transition-all" style={{ width: `${homePct}%` }} />
+						<div className="h-full flex-1 bg-muted-foreground/30" />
 					</div>
 				)}
 			</div>
@@ -242,89 +229,62 @@ function FootballFixture() {
 	};
 
 	const renderStatistics = () => {
+		const getStat = (stats: StatisticsItem[], type: string) =>
+			stats.find((s) => s.type === type)?.value ?? null;
+
 		const homeStats = statistics[0].statistics;
 		const awayStats = statistics[1].statistics;
-		const statTypes = [
-			"Ball Possession",
-			"Shots on Goal",
-			"Corner Kicks",
-			"Yellow Cards",
-		];
-
-		const getStat = (stats: any[], type: string) =>
-			stats.find((s: any) => s.type === type)?.value;
 
 		return (
 			<div className="space-y-5">
-				{statTypes.map((stat) =>
+				{STAT_TYPES.map((stat) =>
 					renderStatBar(getStat(homeStats, stat), getStat(awayStats, stat), stat),
 				)}
 			</div>
 		);
 	};
 
-	const renderRound = () => {
-		if (!league.round.includes("Regular Season")) {
-			return (
-				<span className="rounded-full border border-white/[0.08] bg-secondary px-3 py-1 text-xs text-muted-foreground">
-					{league.round}
-				</span>
-			);
-		}
-		return null;
-	};
-
 	return (
 		<div className="mx-auto max-w-4xl space-y-10">
-			{/* Score hero */}
-			<div>{renderScoreHero()}</div>
+			{renderScoreHero()}
 
-			{/* Match details */}
 			<div>
 				<SectionHeader title="Match Details" svgName="whistle" />
 				<div className="flex flex-wrap items-center justify-center gap-3">
 					<span className="rounded-full border border-white/[0.08] bg-secondary px-4 py-1.5 text-sm text-muted-foreground">
 						{newDate}
 					</span>
-					{renderRound()}
+					{!league.round.includes("Regular Season") && (
+						<span className="rounded-full border border-white/[0.08] bg-secondary px-3 py-1 text-xs text-muted-foreground">
+							{league.round}
+						</span>
+					)}
 				</div>
 			</div>
 
-			{/* Lineups */}
 			<div>
 				<SectionHeader title="Lineups" svgName="lineup" />
 				<div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-					<div>{renderLineup(0)}</div>
-					<div>{renderLineup(1)}</div>
+					{renderLineup(lineups[0])}
+					{renderLineup(lineups[1])}
 				</div>
 			</div>
 
-			{/* Events */}
 			<div>
 				<SectionHeader title="Event Timeline" svgName="timeline" />
 				<EventTimeline events={events} />
 			</div>
 
-			{/* Statistics */}
 			<div>
 				<SectionHeader title="Statistics" svgName="stats" />
-				{/* Team name headers */}
 				<div className="mb-6 flex items-center justify-between">
 					<div className="flex items-center gap-2">
-						<img
-							src={teams.home.logo}
-							alt={teams.home.name}
-							className="h-6 w-6 object-contain"
-						/>
+						<img src={teams.home.logo} alt={teams.home.name} className="h-6 w-6 object-contain" />
 						<span className="text-sm font-semibold">{teams.home.name}</span>
 					</div>
 					<div className="flex items-center gap-2">
 						<span className="text-sm font-semibold">{teams.away.name}</span>
-						<img
-							src={teams.away.logo}
-							alt={teams.away.name}
-							className="h-6 w-6 object-contain"
-						/>
+						<img src={teams.away.logo} alt={teams.away.name} className="h-6 w-6 object-contain" />
 					</div>
 				</div>
 				{renderStatistics()}
